@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "ml-practice"
+version = "0.1.0"
+description = ""
+authors = ["gabe00122 <gabe.keith@yahoo.com>"]
+readme = "README.md"
+packages = [{include = "ml_practice"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.25.2"
+matplotlib = "^3.7.2"
+tensorboard = "^2.14.0"
+torch = "^2.0.1"
+torchvision = "^0.15.2"
+skrl = {extras = ["torch"], version = "^1.0.0rc2", allow-prereleases = true}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
