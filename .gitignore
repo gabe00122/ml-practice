@@ -3,4 +3,6 @@
 .idea/
 data/
 models/
+runs/
 
+__pycache__/
