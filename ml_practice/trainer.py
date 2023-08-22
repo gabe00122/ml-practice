@@ -1,41 +1,37 @@
 import torch.nn as nn
+from torch.optim.optimizer import Optimizer
 from torch.utils.tensorboard import SummaryWriter
+from cifar10 import Cifar10
 
 
 class Trainer:
-    def __init__(self, model: nn.Module, criterion, optimizer, device):
+    def __init__(self, model: nn.Module, criterion: nn.Module, optimizer: Optimizer, data: Cifar10, device: str) -> None:
         self.model = model
         self.criterion = criterion
         self.optimizer = optimizer
+        self.data = data
         self.device = device
-        self.log_interval = 100
 
-    def train(self, dataloader, epochs):
-        writer = SummaryWriter()
-        step = 0
+        self._data_iter = iter(self.data.trainloader)
 
-        for epoch in range(epochs):
-            print("Starting epoch " + str(epoch))
+    def _next_data(self) -> tuple:
+        try:
+            return next(self._data_iter)
+        except StopIteration:
+            self._data_iter = iter(self.data.trainloader)
+            return next(self._data_iter)
 
-            running_loss = 0
+    def train(self) -> float:
+        inputs, labels = self._next_data()
+        inputs = inputs.to(self.device)
+        labels = labels.to(self.device)
 
-            for i, data in enumerate(dataloader, 0):
-                input_data, labels = data
-                input_data = input_data.to(self.device)
-                labels = labels.to(self.device)
+        self.optimizer.zero_grad(set_to_none=True)
 
-                self.optimizer.zero_grad()
+        outputs = self.model(inputs)
 
-                outputs = self.model(input_data)
+        loss = self.criterion(outputs, labels)
+        loss.backward()
+        self.optimizer.step()
 
-                loss = self.criterion(outputs, labels)
-                loss.backward()
-                self.optimizer.step()
-
-                running_loss += loss.item()
-
-                if i % self.log_interval == self.log_interval - 1:
-                    writer.add_scalar('Loss/train', loss.item(), step)
-                step += 1
-
-        writer.close()
+        return loss.item()
